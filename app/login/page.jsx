@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-
+import { GoogleAuthProvider, signInWithRedirect } from "firebase/auth";
 import Alert from "@mui/material/Alert";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
@@ -61,20 +60,21 @@ export default function LoginPage() {
 
     try {
       const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: "select_account" });
-      await signInWithPopup(auth, provider);
-      router.replace("/");
+
+      provider.setCustomParameters({
+        prompt: "select_account",
+      });
+
+      await signInWithRedirect(auth, provider);
     } catch (err) {
-      // Closing the popup is a user choice, not an error worth showing
-      if (
-        err?.code === "auth/popup-closed-by-user" ||
-        err?.code === "auth/cancelled-popup-request"
-      ) {
-        return;
-      }
       console.error("Google login error:", err);
-      setError(err instanceof Error ? err.message : "Unable to login with Google.");
-    } finally {
+
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Unable to login with Google."
+      );
+
       setSubmitting(false);
     }
   }

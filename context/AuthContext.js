@@ -10,6 +10,7 @@ import {
 import {
   onAuthStateChanged,
   signOut,
+  getRedirectResult,
 } from "firebase/auth";
 
 import { auth } from "../lib/firebase";
@@ -21,15 +22,35 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let active = true;
+
+    // Handle the result when Google redirects back to the app.
+    getRedirectResult(auth).catch((error) => {
+      console.error("Google redirect error:", error);
+    });
+
     const unsubscribe = onAuthStateChanged(
       auth,
       (currentUser) => {
+        if (!active) return;
+
         setUser(currentUser);
         setLoading(false);
+      },
+      (error) => {
+        console.error("Firebase auth state error:", error);
+
+        if (active) {
+          setUser(null);
+          setLoading(false);
+        }
       }
     );
 
-    return () => unsubscribe();
+    return () => {
+      active = false;
+      unsubscribe();
+    };
   }, []);
 
   async function logout() {
