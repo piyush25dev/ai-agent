@@ -24,10 +24,19 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     let active = true;
 
-    // Handle the result when Google redirects back to the app.
-    getRedirectResult(auth).catch((error) => {
-      console.error("Google redirect error:", error);
-    });
+    async function initializeAuth() {
+      try {
+        await getRedirectResult(auth);
+      } catch (error) {
+        console.error(
+          "Google redirect result error:",
+          error.code,
+          error.message
+        );
+      }
+    }
+
+    initializeAuth();
 
     const unsubscribe = onAuthStateChanged(
       auth,
@@ -38,7 +47,7 @@ export function AuthProvider({ children }) {
         setLoading(false);
       },
       (error) => {
-        console.error("Firebase auth state error:", error);
+        console.error("Auth state error:", error);
 
         if (active) {
           setUser(null);
@@ -58,13 +67,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        loading,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={{ user, loading, logout }}>
       {children}
     </AuthContext.Provider>
   );
