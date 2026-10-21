@@ -10,7 +10,6 @@ import {
 import {
   onAuthStateChanged,
   signOut,
-  getRedirectResult,
 } from "firebase/auth";
 
 import { auth } from "../lib/firebase";
@@ -22,44 +21,15 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let active = true;
-
-    async function initializeAuth() {
-      try {
-        await getRedirectResult(auth);
-      } catch (error) {
-        console.error(
-          "Google redirect result error:",
-          error.code,
-          error.message
-        );
-      }
-    }
-
-    initializeAuth();
-
     const unsubscribe = onAuthStateChanged(
       auth,
       (currentUser) => {
-        if (!active) return;
-
         setUser(currentUser);
         setLoading(false);
-      },
-      (error) => {
-        console.error("Auth state error:", error);
-
-        if (active) {
-          setUser(null);
-          setLoading(false);
-        }
       }
     );
 
-    return () => {
-      active = false;
-      unsubscribe();
-    };
+    return () => unsubscribe();
   }, []);
 
   async function logout() {
@@ -67,7 +37,13 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
