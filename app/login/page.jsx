@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { GoogleAuthProvider, signInWithRedirect  } from "firebase/auth";
 
 import Alert from "@mui/material/Alert";
 import Avatar from "@mui/material/Avatar";
