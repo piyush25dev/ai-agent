@@ -56,28 +56,29 @@ export default function LoginPage() {
   }, [user, loading, router]);
 
   async function handleGoogleLogin() {
-    setError("");
-    setSubmitting(true);
+  setError("");
+  setSubmitting(true);
 
-    try {
-      const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: "select_account" });
-      await signInWithPopup(auth, provider);
-      router.replace("/");
-    } catch (err) {
-      // Closing the popup is a user choice, not an error worth showing
-      if (
-        err?.code === "auth/popup-closed-by-user" ||
-        err?.code === "auth/cancelled-popup-request"
-      ) {
-        return;
-      }
-      console.error("Google login error:", err);
-      setError(err instanceof Error ? err.message : "Unable to login with Google.");
-    } finally {
-      setSubmitting(false);
-    }
+  try {
+    const provider = new GoogleAuthProvider();
+
+    provider.setCustomParameters({
+      prompt: "select_account",
+    });
+
+    await signInWithRedirect(auth, provider);
+  } catch (err) {
+    console.error("Google login error:", err);
+
+    setError(
+      err instanceof Error
+        ? err.message
+        : "Unable to login with Google."
+    );
+
+    setSubmitting(false);
   }
+}
 
   if (loading || user) {
     return (
